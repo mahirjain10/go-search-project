@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 func recursiveDir(dirPath string, storeFileName *[]string) {
@@ -17,7 +18,7 @@ func recursiveDir(dirPath string, storeFileName *[]string) {
 				return err
 			}
 			fileExt := filepath.Ext(path)
-			fmt.Printf("file path %s : %T", fileExt, fileExt)
+			fmt.Printf("file path %s : %T\n", fileExt, fileExt)
 			*storeFileName = append(*storeFileName, path)
 			// fmt.Println(path, info.Size())
 			return nil
@@ -26,7 +27,7 @@ func recursiveDir(dirPath string, storeFileName *[]string) {
 		log.Println(err)
 	}
 }
-func search(wordToSearch string, fp string) {
+func search(wordToSearch string, fp string) bool{
 	f, err := os.Open(fp)
 	if err != nil {
 		log.Fatal(err)
@@ -48,7 +49,7 @@ func search(wordToSearch string, fp string) {
 			break
 		}
 		if err != nil {
-			fmt.Printf("Error %v reading file", err)
+			fmt.Printf("Error %v reading file ", err)
 			break
 		}
 		if string(b[n-1]) == " " || string(b[n-1]) == "\n" {
@@ -64,13 +65,15 @@ func search(wordToSearch string, fp string) {
 		}
 	}
 	if found {
-		fmt.Printf("word found in %s", dirFound)
+		fmt.Printf("word found in %s\n", dirFound)
+		return true
 	} else {
 		fmt.Println("word not found")
+		return false
 	}
 }
 func main() {
-
+	start := time.Now()
 	// Initalializing flags
 	dir := flag.String("dir", "", "directory or filename")
 	tts := flag.String("tts", "", "text to search")
@@ -101,8 +104,11 @@ func main() {
 	} else {
 		recursiveDir(directory, &store)
 		for _, st := range store {
-			search(textToSearch, st)
+			if search(textToSearch, st){
+				break
+			}
 		}
 	}
-
+	// Calculate the time
+	fmt.Printf("Search Operation took %s\n", time.Since(start))
 }
